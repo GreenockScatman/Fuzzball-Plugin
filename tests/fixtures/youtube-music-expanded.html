@@ -1,0 +1,20 @@
+<ytmusic-app>
+  <main>
+    <ytmusic-player-page id="expanded-player">
+      <div id="cover-art"><img alt="Now playing cover art"></div>
+      <button type="button" aria-label="Pause">Pause</button>
+    </ytmusic-player-page>
+  </main>
+  <div hidden>
+    <ytmusic-guide-entry-renderer>
+      <a href="https://music.youtube.com/playlist?list=HIDDEN"><yt-formatted-string>Real Human Beans</yt-formatted-string></a>
+    </ytmusic-guide-entry-renderer>
+  </div>
+  <nav id="guide" aria-label="Library">
+    <ytmusic-guide-section-renderer>
+      <ytmusic-guide-entry-renderer>
+        <a href="https://music.youtube.com/playlist?list=VISIBLE"><yt-formatted-string>Real Human Beans</yt-formatted-string></a>
+      </ytmusic-guide-entry-renderer>
+    </ytmusic-guide-section-renderer>
+  </nav>
+</ytmusic-app>

@@ -1,0 +1,14 @@
+export const PROTOCOL_VERSION = 1 as const;
+export const HOST = '127.0.0.1';
+export const SOCKET_PATH = '/';
+export const DEFAULT_PORT = 8765;
+export const MAX_MESSAGE_BYTES = 262_144;
+export const MAX_CANDIDATES = 200;
+export const MAX_TEXT = 300;
+export const CANDIDATE_TTL_MS = 15_000;
+export const REQUEST_TIMEOUT_MS = 3_500;
+export const HEARTBEAT_MS = 20_000;
+export const HEARTBEAT_TIMEOUT_MS = 45_000;
+export const RECONNECT_ALARM = 'fuzzball-reconnect';
+export const CAPABILITIES = ['list_interactive_elements', 'click_element', 'open_link_in_new_tab'] as const;
+export type Capability = typeof CAPABILITIES[number];

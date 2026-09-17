@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Fuzzball Web Control</title><link rel="stylesheet" href="popup.css"></head>
+<body>
+  <header><span class="badge" aria-hidden="true">F</span><div><h1>Fuzzball Web Control</h1><p>Your browser, with your permission.</p></div></header>
+  <main>
+    <label class="toggle"><span>Web control enabled</span><input id="enabled" type="checkbox" role="switch"></label>
+    <p id="connection" class="status" aria-live="polite">Waiting for Fuzzball</p>
+    <section aria-labelledby="pairing-heading">
+      <h2 id="pairing-heading">Pair with Fuzzball</h2>
+      <form id="pairing">
+        <label for="token">Pairing token</label><input id="token" type="password" autocomplete="off" spellcheck="false" maxlength="1024" placeholder="Paste token from Fuzzball">
+        <div class="port"><label for="port">Local port</label><input id="port" type="number" min="1" max="65535" step="1" value="8765" required></div>
+        <p class="hint">Connects only to 127.0.0.1. Leave the token blank to keep it.</p>
+        <button type="submit">Save token and reconnect</button>
+      </form>
+    </section>
+    <section aria-labelledby="site-heading">
+      <h2 id="site-heading">Current site</h2><p id="domain" class="domain"></p><p id="permission" aria-live="polite"></p>
+      <div class="actions"><button id="allow" type="button" disabled>Allow on this site</button><button id="remove" type="button" class="secondary" disabled>Remove access to this site</button></div>
+      <p class="hint">Site grants cover this scheme and hostname on all ports.</p>
+      <details><summary>Access to all websites</summary><p class="warning">This lets Fuzzball inspect visible controls on every HTTP and HTTPS site you visit, including private pages.</p><label class="consent"><input id="all-consent" type="checkbox">I understand and want access to all websites.</label><button id="allow-all" type="button" disabled>Allow on all websites</button><button id="remove-all" type="button" class="secondary">Remove all website access</button></details>
+    </section>
+    <p id="diagnostic" class="diagnostic" role="status">Loading…</p>
+  </main>
+  <footer>Protocol <span id="protocol">1</span> · Extension <span id="version"></span></footer>
+  <script src="popup.js" type="module"></script>
+</body></html>
