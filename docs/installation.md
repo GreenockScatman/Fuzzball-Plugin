@@ -7,7 +7,7 @@
 3. Open `chrome://extensions` in Chrome 120 or newer.
 4. Turn on **Developer mode** in the top-right corner.
 5. Choose **Load unpacked** and select `fuzzball-web-control\dist`.
-6. Verify the extension is named **Fuzzball Web Control**, version **0.1.1**, and has no manifest/load errors. Pin it using Chrome's Extensions menu.
+6. Verify the extension is named **Fuzzball Web Control**, version **0.1.4**, and has no manifest/load errors. Pin it using Chrome's Extensions menu.
 
 For this workspace, the generated directory is:
 

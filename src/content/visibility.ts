@@ -27,6 +27,16 @@ export function visibleRect(element: Element): DOMRect | null {
   for (const rect of element.getClientRects()) {
     let left = Math.max(0, rect.left), top = Math.max(0, rect.top), right = Math.min(innerWidth, rect.right), bottom = Math.min(innerHeight, rect.bottom);
     for (let ancestor = parentElement(element); ancestor; ancestor = parentElement(ancestor)) {
+      // The root scrollport is the viewport, already applied above. When the
+      // root has visible overflow, body overflow is propagated to that same
+      // scrollport; the body's own box can be zero-height around fixed content.
+      if (ancestor === element.ownerDocument.documentElement) continue;
+      if (ancestor === element.ownerDocument.body) {
+        const rootStyle = getComputedStyle(element.ownerDocument.documentElement);
+        const rootX = rootStyle.overflowX || rootStyle.overflow || 'visible';
+        const rootY = rootStyle.overflowY || rootStyle.overflow || 'visible';
+        if (rootX === 'visible' && rootY === 'visible') continue;
+      }
       const style = getComputedStyle(ancestor), clip = ancestor.getBoundingClientRect();
       if (/(hidden|clip|scroll|auto)/.test(style.overflowX)) { left = Math.max(left, clip.left); right = Math.min(right, clip.right); }
       if (/(hidden|clip|scroll|auto)/.test(style.overflowY)) { top = Math.max(top, clip.top); bottom = Math.min(bottom, clip.bottom); }

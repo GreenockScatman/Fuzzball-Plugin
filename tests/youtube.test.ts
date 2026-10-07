@@ -12,10 +12,50 @@ beforeEach(() => {
   document.body.innerHTML = readFileSync('tests/fixtures/youtube.html', 'utf8');
   store = new CandidateStore();
 });
-afterEach(() => { store.clear(); vi.unstubAllGlobals(); });
+afterEach(() => { store.clear(); document.body.style.cssText = ''; document.documentElement.style.cssText = ''; vi.unstubAllGlobals(); });
 const videoLinks = () => scan(store, 200).filter(candidate => candidate.role === 'link' && candidate.scope === 'main_content');
 
 describe('regular YouTube results', () => {
+  it('uses the viewport for body overflow propagated to the root', () => {
+    document.body.style.overflowY = 'scroll';
+    vi.spyOn(document.body, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 800, 0));
+    expect(videoLinks().map(candidate => candidate.name)).toEqual(['Goofy Cats', 'Sleepy Cats']);
+    document.body.style.overflowY = '';
+  });
+  it('retains clipping by the body when root overflow prevents propagation', () => {
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflowY = 'scroll';
+    vi.spyOn(document.body, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 800, 0));
+    expect(videoLinks()).toEqual([]);
+  });
+  it('finds video links after a large non-interactive prefix', () => {
+    const prefix = document.createElement('div');
+    prefix.hidden = true;
+    prefix.innerHTML = '<span></span>'.repeat(20_100);
+    document.body.prepend(prefix);
+    expect(videoLinks().map(candidate => candidate.name)).toEqual(['Goofy Cats', 'Sleepy Cats']);
+  });
+  it('keeps interleaved shadow links in page order', () => {
+    document.body.innerHTML = '<h3><a href="https://www.youtube.com/watch?v=first">First</a></h3><ytd-video-renderer></ytd-video-renderer><h3><a href="https://www.youtube.com/watch?v=third">Third</a></h3>';
+    document.querySelector('ytd-video-renderer')!.attachShadow({ mode: 'open' }).innerHTML = '<h3><a href="https://www.youtube.com/watch?v=second">Second</a></h3>';
+    expect(videoLinks().map(candidate => candidate.name)).toEqual(['First', 'Second', 'Third']);
+  });
+  it('deduplicates class-based lockups and extracts their visible heading title', () => {
+    document.body.innerHTML = '<div class="yt-lockup-view-model-wiz"><a href="https://www.youtube.com/watch?v=modern123" aria-label="Modern Cats by Example Channel"><span>5:00</span></a><div class="yt-lockup-metadata-view-model-wiz__title" role="heading"><a href="https://www.youtube.com/watch?v=modern123" aria-label="Modern Cats by Example Channel">Modern Cats</a></div></div>';
+    expect(videoLinks().map(candidate => candidate.name)).toEqual(['Modern Cats']);
+  });
+  it('labels an empty thumbnail from a visible card title when only the thumbnail is clickable', () => {
+    document.body.innerHTML = '<ytd-rich-grid-media><a href="https://www.youtube.com/watch?v=image123"><img src="thumbnail.jpg"></a><h3>Image Cats</h3></ytd-rich-grid-media>';
+    expect(videoLinks().map(candidate => candidate.name)).toEqual(['Image Cats']);
+  });
+  it('keeps channel links outside the numbered videos even under a main landmark', () => {
+    document.body.innerHTML = '<main>' + document.body.innerHTML + '</main>';
+    expect(videoLinks().map(candidate => candidate.name)).toEqual(['Goofy Cats', 'Sleepy Cats']);
+  });
+  it('retains video classification when the title contains a transaction word', () => {
+    document.querySelector('#first-video #video-title')!.textContent = 'How to remove cat hair';
+    expect(videoLinks()[0].semantic_kind).toBe('search_result');
+  });
   it('exposes the requested title in main_content without requiring a native main landmark', () => {
     expect(document.querySelector('main, [role=main]')).toBeNull();
     expect(videoLinks().find(candidate => candidate.name === 'Goofy Cats')).toMatchObject({ semantic_kind: 'search_result' });

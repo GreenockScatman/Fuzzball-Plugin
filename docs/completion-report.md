@@ -1,6 +1,6 @@
 # Delivery and verification record
 
-Updated to **0.1.1** with the regular YouTube title-matching repair. See [the diagnosis and reload instructions](youtube-troubleshooting.md).
+Updated to **0.1.4** with corrected viewport/body overflow visibility checks, YouTube home/search title and ordinal selection repairs, scanner-budget fixes, search-query preservation and diagnostic counts. See [the diagnosis and reload instructions](youtube-troubleshooting.md).
 
 The project is implemented in this separate workspace. The generated unpacked extension is `dist/`. The Fuzzball Python application was inspected read-only for its protocol and was not modified. No Git repository existed in the workspace at the start; no commit, push, pull request, deployment or store publication was performed.
 

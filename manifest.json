@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Fuzzball Web Control",
-  "version": "0.1.1",
+  "version": "0.1.4",
   "description": "Let your paired local Fuzzball assistant inspect and activate visible controls on sites you allow.",
   "minimum_chrome_version": "120",
   "permissions": ["storage", "scripting", "tabs", "alarms", "webNavigation"],

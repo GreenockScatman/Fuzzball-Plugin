@@ -3,8 +3,9 @@ import { closestComposed, isInteractable } from '../content/visibility';
 import type { Metadata } from './generic';
 
 const HOSTS = new Set(['youtube.com', 'www.youtube.com', 'm.youtube.com']);
-const VIDEO_CARD = 'ytd-video-renderer, ytd-grid-video-renderer, ytd-rich-grid-media, ytd-rich-item-renderer, ytd-compact-video-renderer, yt-lockup-view-model';
-const VIDEO_TITLE = 'a#video-title, a#video-title-link, a.yt-lockup-metadata-view-model__title, .yt-lockup-metadata-view-model__title a, h3 a[href], a[role=heading]';
+const VIDEO_CARD = 'ytd-video-renderer, ytd-grid-video-renderer, ytd-rich-grid-media, ytd-rich-item-renderer, ytd-compact-video-renderer, yt-lockup-view-model, .yt-lockup-view-model, .yt-lockup-view-model-wiz';
+const TITLE_CONTENT = '#video-title, #video-title-link, .yt-lockup-metadata-view-model__title, .yt-lockup-metadata-view-model-wiz__title, h3, [role=heading]';
+const VIDEO_TITLE = 'a#video-title, a#video-title-link, a.yt-lockup-metadata-view-model__title, a.yt-lockup-metadata-view-model-wiz__title, .yt-lockup-metadata-view-model__title a, .yt-lockup-metadata-view-model-wiz__title a, h3 a[href], [role=heading] a[href], a[role=heading]';
 const EXCLUDED = 'ytd-masthead, ytd-guide-renderer, ytd-mini-guide-renderer, nav, header, footer, [role=navigation], [role=banner], ytd-ad-slot-renderer, ytd-promoted-video-renderer, ytd-promoted-sparkles-web-renderer, ytd-display-ad-renderer, [is-ad], [data-ad-slot], [data-sponsored]';
 
 function videoDestination(element: HTMLAnchorElement): URL | null {
@@ -32,8 +33,8 @@ export function youtube(element: Element, page: URL): Partial<Metadata> | null {
   if (!HOSTS.has(page.hostname) || !(element instanceof HTMLAnchorElement)) return null;
   if (closestComposed(element, EXCLUDED)) return { scope: 'any' };
   const destination = videoDestination(element);
-  if (!destination) return null;
   const card = closestComposed(element, VIDEO_CARD);
+  if (!destination) return card || new URL(element.href).pathname === '/results' ? { scope: 'any' } : null;
   const isTitle = element.matches(VIDEO_TITLE);
   if (!card && !isTitle) return null;
 
@@ -53,6 +54,16 @@ export function youtube(element: Element, page: URL): Partial<Metadata> | null {
   if (isTitle) {
     const name = visibleText(element) || concise(element.getAttribute('title') ?? '');
     if (name) metadata.name = name;
+  } else if (card) {
+    // Some cards expose only a clickable image; its heading is a sibling.
+    const headings = [...card.querySelectorAll(TITLE_CONTENT), ...card.shadowRoot?.querySelectorAll(TITLE_CONTENT) ?? []];
+    const heading = headings.find(node => {
+      if (closestComposed(node, VIDEO_CARD) !== card || !visibleText(node)) return false;
+      const link = node instanceof HTMLAnchorElement ? node : node.querySelector<HTMLAnchorElement>('a[href]');
+      const target = link && videoDestination(link);
+      return !link || !!target && samePlayback(destination, target);
+    });
+    if (heading) metadata.name = visibleText(heading);
   }
   return metadata;
 }
